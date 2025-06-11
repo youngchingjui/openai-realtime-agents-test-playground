@@ -21,6 +21,7 @@ import { useEvent } from "@/app/contexts/EventContext";
 
 // Utilities
 import { RealtimeClient } from "@/app/agentConfigs/realtimeClient";
+import { normalizeEventKeys } from "./lib/normalizeEventKeys";
 
 // Agent configs
 import { allAgentSets, defaultAgentSetKey } from "@/app/agentConfigs";
@@ -219,27 +220,19 @@ function App() {
           else setSessionStatus("DISCONNECTED");
         });
 
+        // Normalize event objects as soon as they arrive
         client.on("message", (ev) => {
-          logServerEvent(ev);
-
-          // --- Realtime streaming handling ---------------------------------
-          // The Realtime transport emits granular *delta* events while the
-          // assistant is speaking or while the user's audio is still being
-          // transcribed. Those events were previously only logged which made
-          // the UI update only once when the final conversation.item.* event
-          // arrived – effectively disabling streaming. We now listen for the
-          // delta events and update the transcript as they arrive so that
-          // 1) assistant messages stream token-by-token, and
-          // 2) the user sees a live "Transcribing…" placeholder while we are
-          //    still converting their speech to text.
-
-          // NOTE: The exact payloads are still evolving.  We intentionally
-          // access properties defensively to avoid runtime crashes if fields
-          // are renamed or missing.
+          const normalizedEv = normalizeEventKeys(ev); // <-- Normalize event keys
+          logServerEvent(normalizedEv);
+          /*
+            All event handlers below now use only camelCase properties from normalizedEv,
+            no longer referencing snake_case or needing fallback logic for keys.
+            This enforces a single event shape for downstream UI logic.
+          */
 
           try {
             // Guardrail trip event – mark last assistant message as FAIL
-            if (ev.type === 'guardrail_tripped') {
+            if (normalizedEv.type === 'guardrailTripped') {
               const lastAssistant = [...transcriptItemsRef.current]
                 .reverse()
                 .find((i) => i.role === 'assistant');
@@ -259,7 +252,7 @@ function App() {
 
             // Response finished – if we still have Pending guardrail mark as
             // Pass. This event fires once per assistant turn.
-            if (ev.type === 'response.done') {
+            if (normalizedEv.type === 'response.done') {
               const lastAssistant = [...transcriptItemsRef.current]
                 .reverse()
                 .find((i) => i.role === 'assistant');
@@ -280,11 +273,11 @@ function App() {
             }
             // Assistant text (or audio-to-text) streaming
             if (
-              ev.type === 'response.text.delta' ||
-              ev.type === 'response.audio_transcript.delta'
+              normalizedEv.type === 'response.text.delta' ||
+              normalizedEv.type === 'response.audioTranscript.delta'
             ) {
-              const itemId: string | undefined = (ev as any).item_id ?? (ev as any).itemId;
-              const delta: string | undefined = (ev as any).delta ?? (ev as any).text;
+              const itemId: string | undefined = normalizedEv.itemId;
+              const delta: string | undefined = normalizedEv.delta;
               if (!itemId || !delta) return;
 
               // Ensure a transcript message exists for this assistant item.
@@ -304,9 +297,9 @@ function App() {
             }
 
             // Live user transcription streaming
-            if (ev.type === 'conversation.input_audio_transcription.delta') {
-              const itemId: string | undefined = (ev as any).item_id ?? (ev as any).itemId;
-              const delta: string | undefined = (ev as any).delta ?? (ev as any).text;
+            if (normalizedEv.type === 'conversation.inputAudioTranscription.delta') {
+              const itemId: string | undefined = normalizedEv.itemId;
+              const delta: string | undefined = normalizedEv.delta;
               if (!itemId || typeof delta !== 'string') return;
 
               // If this is the very first chunk, create a hidden user message
@@ -320,8 +313,8 @@ function App() {
             }
 
             // Detect start of a new user speech segment when VAD kicks in.
-            if (ev.type === 'input_audio_buffer.speech_started') {
-              const itemId: string | undefined = (ev as any).item_id;
+            if (normalizedEv.type === 'inputAudioBuffer.speechStarted') {
+              const itemId: string | undefined = normalizedEv.itemId;
               if (!itemId) return;
 
               const exists = transcriptItemsRef.current.some(
@@ -335,10 +328,10 @@ function App() {
 
             // Final transcript once Whisper finishes
             if (
-              ev.type === 'conversation.item.input_audio_transcription.completed'
+              normalizedEv.type === 'conversation.item.inputAudioTranscription.completed'
             ) {
-              const itemId: string | undefined = (ev as any).item_id;
-              const transcriptText: string | undefined = (ev as any).transcript;
+              const itemId: string | undefined = normalizedEv.itemId;
+              const transcriptText: string | undefined = normalizedEv.transcript;
               if (!itemId || typeof transcriptText !== 'string') return;
 
               const exists = transcriptItemsRef.current.some(
@@ -353,14 +346,13 @@ function App() {
               updateTranscriptItem(itemId, { status: 'DONE' });
             }
 
-            // Assistant streaming tokens or transcript
+            // Assistant streaming tokens or transcript (responseId=>itemId)
             if (
-              ev.type === 'response.text.delta' ||
-              ev.type === 'response.audio_transcript.delta'
+              normalizedEv.type === 'response.text.delta' ||
+              normalizedEv.type === 'response.audioTranscript.delta'
             ) {
-              const responseId: string | undefined =
-                (ev as any).response_id ?? (ev as any).responseId;
-              const delta: string | undefined = (ev as any).delta ?? (ev as any).text;
+              const responseId: string | undefined = normalizedEv.responseId;
+              const delta: string | undefined = normalizedEv.delta;
               if (!responseId || typeof delta !== 'string') return;
 
               // We'll use responseId as part of itemId to make it deterministic.
