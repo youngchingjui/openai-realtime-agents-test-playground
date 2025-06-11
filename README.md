@@ -16,6 +16,45 @@ There are two main patterns demonstrated:
 - Open your browser to [http://localhost:3000](http://localhost:3000). It should default to the `chatSupervisor` Agent Config.
 - You can change examples via the "Scenario" dropdown in the top right.
 
+## Customizing the App
+
+Want to make this app your own? Here are the main ways you can customize and extend its behavior and appearance:
+
+### 1. Edit/Add Agent Configurations
+
+- Directory: `src/app/agentConfigs/`
+  - Each file in this directory describes an agent’s logic, instructions, and available tools.
+  - E.g., change user flow/behavior by editing files like `chatSupervisor/index.ts` or creating your own config file.
+- To activate a new agent scenario, add its config to `src/app/agentConfigs/index.ts`.
+- You can customize prompts, allowed actions, and tool schemas, or implement new logic.
+
+### 2. Customize the User Interface
+
+- UI components are in `src/app/components/`
+  - Example: To adjust how the transcript appears, edit `Transcript.tsx`
+  - Update or add your own components for toolbars, event display, etc.
+
+### 3. Update Main Layout and Context
+
+- Main app entry: `src/app/page.tsx`, layout: `src/app/layout.tsx`
+- To modify app structure or add new context providers, update these files.
+
+### 4. Adjust API Logic & Utilities
+
+- Backend/API: `src/app/api/`
+- Utilities/shared logic: `src/app/lib/`, types in `src/app/types.ts`
+- Styles/global CSS: `src/app/globals.css`, Tailwind config in `tailwind.config.ts`
+
+### Developer Tips
+
+- File changes in `/src` are typically hot-reloaded when running `npm run dev`.
+- When adding new agent scenarios, ensure they are registered so they show up in the Scenario dropdown.
+- For more examples, see the config files in `src/app/agentConfigs/customerServiceRetail/` and the usage in components like `Transcript.tsx`.
+
+---
+
+By following the above pointers, you can adapt this project to your own agent workflows and UI requirements.
+
 # Agentic Pattern 1: Chat-Supervisor
 
 This is demonstrated in the [chatSupervisor](src/app/agentConfigs/chatSupervisor/index.ts) Agent Config. The chat agent uses the realtime model to converse with the user and handle basic tasks, like greeting the user, casual conversation, and collecting information, and a more intelligent, text-based supervisor model (e.g. `gpt-4.1`) is used extensively to handle tool calls and more challenging responses. You can control the decision boundary by "opting in" specific tasks to the chat agent as desired.
