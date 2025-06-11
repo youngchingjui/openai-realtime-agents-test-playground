@@ -353,26 +353,7 @@ function App() {
               updateTranscriptItem(itemId, { status: 'DONE' });
             }
 
-            // Assistant streaming tokens or transcript
-            if (
-              ev.type === 'response.text.delta' ||
-              ev.type === 'response.audio_transcript.delta'
-            ) {
-              const responseId: string | undefined =
-                (ev as any).response_id ?? (ev as any).responseId;
-              const delta: string | undefined = (ev as any).delta ?? (ev as any).text;
-              if (!responseId || typeof delta !== 'string') return;
-
-              // We'll use responseId as part of itemId to make it deterministic.
-              const itemId = `assistant-${responseId}`;
-
-              if (!transcriptItemsRef.current.some((t) => t.itemId === itemId)) {
-                addTranscriptMessage(itemId, 'assistant', '');
-              }
-
-              updateTranscriptMessage(itemId, delta, true);
-              updateTranscriptItem(itemId, { status: 'IN_PROGRESS' });
-            }
+            // (REMOVED BLOCK: Assistant streaming tokens or transcript with responseId)
           } catch (err) {
             // Streaming is best-effort – never break the session because of it.
             console.warn('streaming-ui error', err);
