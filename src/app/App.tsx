@@ -13,7 +13,7 @@ import BottomToolbar from "./components/BottomToolbar";
 
 // Types
 import { SessionStatus, TranscriptItem } from "@/app/types";
-import type { RealtimeAgent } from '@openai/agents/realtime';
+import type { RealtimeAgent } from '\''@openai/agents/realtime'\'';
 
 // Context providers & hooks
 import { useTranscript } from "@/app/contexts/TranscriptContext";
@@ -68,10 +68,10 @@ function App() {
   const audioElementRef = useRef<HTMLAudioElement | null>(null);
 
   const sdkAudioElement = React.useMemo(() => {
-    if (typeof window === 'undefined') return undefined;
-    const el = document.createElement('audio');
+    if (typeof window === '\''undefined'\'') return undefined;
+    const el = document.createElement('\''audio'\'');
     el.autoplay = true;
-    el.style.display = 'none';
+    el.style.display = '\''none'\'';
     document.body.appendChild(el);
     return el;
   }, []);
@@ -95,9 +95,9 @@ function App() {
   const [isPTTUserSpeaking, setIsPTTUserSpeaking] = useState<boolean>(false);
   const [isAudioPlaybackEnabled, setIsAudioPlaybackEnabled] = useState<boolean>(
     () => {
-      if (typeof window === 'undefined') return true;
-      const stored = localStorage.getItem('audioPlaybackEnabled');
-      return stored ? stored === 'true' : true;
+      if (typeof window === '\''undefined'\'') return true;
+      const stored = localStorage.getItem('\''audioPlaybackEnabled'\'');
+      return stored ? stored === '\''true'\'' : true;
     },
   );
 
@@ -107,16 +107,16 @@ function App() {
   const { startRecording, stopRecording, downloadRecording } =
     useAudioDownload();
 
-  const sendClientEvent = (eventObj: any, eventNameSuffix = '') => {
+  const sendClientEvent = (eventObj: any, eventNameSuffix = '\'''\'') => {
     if (!sdkClientRef.current) {
-      console.error('SDK client not available', eventObj);
+      console.error('\''SDK client not available'\'', eventObj);
       return;
     }
 
     try {
       sdkClientRef.current.sendEvent(eventObj);
     } catch (err) {
-      console.error('Failed to send via SDK', err);
+      console.error('\''Failed to send via SDK'\'', err);
     }
   };
 
@@ -167,21 +167,51 @@ function App() {
     }
   }, [isPTTActive]);
 
+  // --- PATCHED: Add error display state for ephemeral key fetch -----
+  const [ephemeralKeyError, setEphemeralKeyError] = useState<string | null>(null);
+
   const fetchEphemeralKey = async (): Promise<string | null> => {
     logClientEvent({ url: "/session" }, "fetch_session_token_request");
-    const tokenResponse = await fetch("/api/session");
-    const data = await tokenResponse.json();
-    logServerEvent(data, "fetch_session_token_response");
+    setEphemeralKeyError(null);
+    try {
+      const tokenResponse = await fetch("/api/session");
+      if (!tokenResponse.ok) {
+        let errMsg = `Failed to fetch ephemeral key: ${tokenResponse.status} ${tokenResponse.statusText}`;
+        // Try to get message from the body
+        try {
+          const errData = await tokenResponse.json();
+          if (errData?.error) {
+            errMsg = errData.error;
+          }
+        } catch {}
+        logClientEvent(errMsg, "error.ephemeral_key_fetch");
+        setSessionStatus("DISCONNECTED");
+        setEphemeralKeyError(errMsg);
+        return null;
+      }
 
-    if (!data.client_secret?.value) {
-      logClientEvent(data, "error.no_ephemeral_key");
-      console.error("No ephemeral key provided by the server");
+      const data = await tokenResponse.json();
+      logServerEvent(data, "fetch_session_token_response");
+
+      if (!data.client_secret?.value) {
+        logClientEvent(data, "error.no_ephemeral_key");
+        const errorMsg = "No ephemeral key provided by the server";
+        setEphemeralKeyError(errorMsg);
+        console.error(errorMsg);
+        setSessionStatus("DISCONNECTED");
+        return null;
+      }
+
+      return data.client_secret.value;
+    } catch (err) {
+      const errorMsg = `Could not connect to server: ${err}`;
+      logClientEvent(errorMsg, "error.connect_server");
       setSessionStatus("DISCONNECTED");
+      setEphemeralKeyError(errorMsg);
       return null;
     }
-
-    return data.client_secret.value;
   };
+  // --- END PATCHED BLOCK ----
 
   const connectToRealtime = async () => {
     const agentSetKey = searchParams.get("agentConfig") || "default";
@@ -224,7 +254,7 @@ function App() {
 
           // --- Realtime streaming handling ---------------------------------
           // The Realtime transport emits granular *delta* events while the
-          // assistant is speaking or while the user's audio is still being
+          // assistant is speaking or while the user'\''s audio is still being
           // transcribed. Those events were previously only logged which made
           // the UI update only once when the final conversation.item.* event
           // arrived – effectively disabling streaming. We now listen for the
@@ -239,18 +269,18 @@ function App() {
 
           try {
             // Guardrail trip event – mark last assistant message as FAIL
-            if (ev.type === 'guardrail_tripped') {
+            if (ev.type === '\''guardrail_tripped'\'') {
               const lastAssistant = [...transcriptItemsRef.current]
                 .reverse()
-                .find((i) => i.role === 'assistant');
+                .find((i) => i.role === '\''assistant'\'');
 
               if (lastAssistant) {
                 updateTranscriptItem(lastAssistant.itemId, {
                   guardrailResult: {
-                    status: 'DONE',
-                    category: 'OFF_BRAND',
-                    rationale: 'Guardrail triggered',
-                    testText: '',
+                    status: '\''DONE'\'',
+                    category: '\''OFF_BRAND'\'',
+                    rationale: '\''Guardrail triggered'\'',
+                    testText: '\'''\'',
                   },
                 } as any);
               }
@@ -259,19 +289,19 @@ function App() {
 
             // Response finished – if we still have Pending guardrail mark as
             // Pass. This event fires once per assistant turn.
-            if (ev.type === 'response.done') {
+            if (ev.type === '\''response.done'\'') {
               const lastAssistant = [...transcriptItemsRef.current]
                 .reverse()
-                .find((i) => i.role === 'assistant');
+                .find((i) => i.role === '\''assistant'\'');
 
               if (lastAssistant) {
                 const existing: any = (lastAssistant as any).guardrailResult;
-                if (!existing || existing.status === 'IN_PROGRESS') {
+                if (!existing || existing.status === '\''IN_PROGRESS'\'') {
                   updateTranscriptItem(lastAssistant.itemId, {
                     guardrailResult: {
-                      status: 'DONE',
-                      category: 'NONE',
-                      rationale: '',
+                      status: '\''DONE'\'',
+                      category: '\''NONE'\'',
+                      rationale: '\'''\'',
                     },
                   } as any);
                 }
@@ -280,8 +310,8 @@ function App() {
             }
             // Assistant text (or audio-to-text) streaming
             if (
-              ev.type === 'response.text.delta' ||
-              ev.type === 'response.audio_transcript.delta'
+              ev.type === '\''response.text.delta'\'' ||
+              ev.type === '\''response.audio_transcript.delta'\''
             ) {
               const itemId: string | undefined = (ev as any).item_id ?? (ev as any).itemId;
               const delta: string | undefined = (ev as any).delta ?? (ev as any).text;
@@ -289,38 +319,38 @@ function App() {
 
               // Ensure a transcript message exists for this assistant item.
               if (!transcriptItemsRef.current.some((t) => t.itemId === itemId)) {
-                addTranscriptMessage(itemId, 'assistant', '');
+                addTranscriptMessage(itemId, '\''assistant'\'', '\'''\'');
                 updateTranscriptItem(itemId, {
                   guardrailResult: {
-                    status: 'IN_PROGRESS',
+                    status: '\''IN_PROGRESS'\'',
                   },
                 } as any);
               }
 
               // Append the latest delta so the UI streams.
               updateTranscriptMessage(itemId, delta, true);
-              updateTranscriptItem(itemId, { status: 'IN_PROGRESS' });
+              updateTranscriptItem(itemId, { status: '\''IN_PROGRESS'\'' });
               return;
             }
 
             // Live user transcription streaming
-            if (ev.type === 'conversation.input_audio_transcription.delta') {
+            if (ev.type === '\''conversation.input_audio_transcription.delta'\'') {
               const itemId: string | undefined = (ev as any).item_id ?? (ev as any).itemId;
               const delta: string | undefined = (ev as any).delta ?? (ev as any).text;
-              if (!itemId || typeof delta !== 'string') return;
+              if (!itemId || typeof delta !== '\''string'\'') return;
 
               // If this is the very first chunk, create a hidden user message
               // so that we can surface "Transcribing…" immediately.
               if (!transcriptItemsRef.current.some((t) => t.itemId === itemId)) {
-                addTranscriptMessage(itemId, 'user', 'Transcribing…');
+                addTranscriptMessage(itemId, '\''user'\'', '\''Transcribing…'\'');
               }
 
               updateTranscriptMessage(itemId, delta, true);
-              updateTranscriptItem(itemId, { status: 'IN_PROGRESS' });
+              updateTranscriptItem(itemId, { status: '\''IN_PROGRESS'\'' });
             }
 
             // Detect start of a new user speech segment when VAD kicks in.
-            if (ev.type === 'input_audio_buffer.speech_started') {
+            if (ev.type === '\''input_audio_buffer.speech_started'\'') {
               const itemId: string | undefined = (ev as any).item_id;
               if (!itemId) return;
 
@@ -328,76 +358,59 @@ function App() {
                 (t) => t.itemId === itemId,
               );
               if (!exists) {
-                addTranscriptMessage(itemId, 'user', 'Transcribing…');
-                updateTranscriptItem(itemId, { status: 'IN_PROGRESS' });
+                addTranscriptMessage(itemId, '\''user'\'', '\''Transcribing…'\'');
+                updateTranscriptItem(itemId, { status: '\''IN_PROGRESS'\'' });
               }
             }
 
             // Final transcript once Whisper finishes
             if (
-              ev.type === 'conversation.item.input_audio_transcription.completed'
+              ev.type === '\''conversation.item.input_audio_transcription.completed'\''
             ) {
               const itemId: string | undefined = (ev as any).item_id;
               const transcriptText: string | undefined = (ev as any).transcript;
-              if (!itemId || typeof transcriptText !== 'string') return;
+              if (!itemId || typeof transcriptText !== '\''string'\'') return;
 
               const exists = transcriptItemsRef.current.some(
                 (t) => t.itemId === itemId,
               );
               if (!exists) {
-                addTranscriptMessage(itemId, 'user', transcriptText.trim());
+                addTranscriptMessage(itemId, '\''user'\'', transcriptText.trim());
               } else {
                 // Replace placeholder / delta text with final transcript
                 updateTranscriptMessage(itemId, transcriptText.trim(), false);
               }
-              updateTranscriptItem(itemId, { status: 'DONE' });
+              updateTranscriptItem(itemId, { status: '\''DONE'\'' });
             }
 
-            // Assistant streaming tokens or transcript
-            if (
-              ev.type === 'response.text.delta' ||
-              ev.type === 'response.audio_transcript.delta'
-            ) {
-              const responseId: string | undefined =
-                (ev as any).response_id ?? (ev as any).responseId;
-              const delta: string | undefined = (ev as any).delta ?? (ev as any).text;
-              if (!responseId || typeof delta !== 'string') return;
-
-              // We'll use responseId as part of itemId to make it deterministic.
-              const itemId = `assistant-${responseId}`;
-
-              if (!transcriptItemsRef.current.some((t) => t.itemId === itemId)) {
-                addTranscriptMessage(itemId, 'assistant', '');
-              }
-
-              updateTranscriptMessage(itemId, delta, true);
-              updateTranscriptItem(itemId, { status: 'IN_PROGRESS' });
-            }
+            // --- REMOVED: second assistant streaming block for delta events ---
+            // It is now handled above only using item_id/itemId for itemId.
+            // ---------------------------------------------------------------
           } catch (err) {
             // Streaming is best-effort – never break the session because of it.
-            console.warn('streaming-ui error', err);
+            console.warn('\''streaming-ui error'\'', err);
           }
         });
 
-        client.on('history_added', (item) => {
+        client.on('\''history_added'\'', (item) => {
           logHistoryItem(item);
 
           // Update the transcript view
-          if (item.type === 'message') {
+          if (item.type === '\''message'\'') {
             const textContent = (item.content || [])
               .map((c: any) => {
-                if (c.type === 'text') return c.text;
-                if (c.type === 'input_text') return c.text;
-                if (c.type === 'input_audio') return c.transcript ?? '';
-                if (c.type === 'audio') return c.transcript ?? '';
-                return '';
+                if (c.type === '\''text'\'') return c.text;
+                if (c.type === '\''input_text'\'') return c.text;
+                if (c.type === '\''input_audio'\'') return c.transcript ?? '\'''\'';
+                if (c.type === '\''audio'\'') return c.transcript ?? '\'''\'';
+                return '\'''\'';
               })
-              .join(' ')
+              .join('\'' '\'')
               .trim();
 
             if (!textContent) return;
 
-            const role = item.role as 'user' | 'assistant';
+            const role = item.role as '\''user'\'' | '\''assistant'\'';
 
             // No PTT placeholder logic needed
 
@@ -407,10 +420,10 @@ function App() {
 
             if (!exists) {
               addTranscriptMessage(item.itemId, role, textContent, false);
-              if (role === 'assistant') {
+              if (role === '\''assistant'\'') {
                 updateTranscriptItem(item.itemId, {
                   guardrailResult: {
-                    status: 'IN_PROGRESS',
+                    status: '\''IN_PROGRESS'\'',
                   },
                 } as any);
               }
@@ -420,38 +433,38 @@ function App() {
 
             // After assistant message completes, add default guardrail PASS if none present.
             if (
-              role === 'assistant' &&
-              (item as any).status === 'completed'
+              role === '\''assistant'\'' &&
+              (item as any).status === '\''completed'\''
             ) {
               const current = transcriptItemsRef.current.find(
                 (t) => t.itemId === item.itemId,
               );
               const existing = (current as any)?.guardrailResult;
-              if (existing && existing.status !== 'IN_PROGRESS') {
+              if (existing && existing.status !== '\''IN_PROGRESS'\'') {
                 // already final (e.g., FAIL) – leave as is.
               } else {
                 updateTranscriptItem(item.itemId, {
                   guardrailResult: {
-                    status: 'DONE',
-                    category: 'NONE',
-                    rationale: '',
+                    status: '\''DONE'\'',
+                    category: '\''NONE'\'',
+                    rationale: '\'''\'',
                   },
                 } as any);
               }
             }
 
-            if ('status' in item) {
+            if ('\''status'\'' in item) {
               updateTranscriptItem(item.itemId, {
                 status:
-                  (item as any).status === 'completed'
-                    ? 'DONE'
-                    : 'IN_PROGRESS',
+                  (item as any).status === '\''completed'\''
+                    ? '\''DONE'\''
+                    : '\''IN_PROGRESS'\'',
               });
             }
           }
 
           // Surface function / hand-off calls as breadcrumbs
-          if (item.type === 'function_call') {
+          if (item.type === '\''function_call'\'') {
             const title = `Tool call: ${(item as any).name}`;
 
             if (!loggedFunctionCallsRef.current.has(item.itemId)) {
@@ -464,7 +477,7 @@ function App() {
               // agent so subsequent session updates & breadcrumbs reflect the
               // new agent. The Realtime SDK already updated the session on
               // the backend; this only affects the UI state.
-              const toolName: string = (item as any).name ?? '';
+              const toolName: string = (item as any).name ?? '\'''\'';
               const handoffMatch = toolName.match(/^transfer_to_(.+)$/);
               if (handoffMatch) {
                 const newAgentKey = handoffMatch[1];
@@ -484,9 +497,9 @@ function App() {
 
         // Handle continuous updates for existing items so streaming assistant
         // speech shows up while in_progress.
-        client.on('history_updated', (history) => {
+        client.on('\''history_updated'\'', (history) => {
           history.forEach((item: any) => {
-            if (item.type === 'function_call') {
+            if (item.type === '\''function_call'\'') {
               // Update breadcrumb data (e.g., add output) once we have more info.
 
               if (!loggedFunctionCallsRef.current.has(item.itemId)) {
@@ -496,7 +509,7 @@ function App() {
                 });
                 loggedFunctionCallsRef.current.add(item.itemId);
 
-                const toolName: string = (item as any).name ?? '';
+                const toolName: string = (item as any).name ?? '\'''\'';
                 const handoffMatch = toolName.match(/^transfer_to_(.+)$/);
                 if (handoffMatch) {
                   const newAgentKey = handoffMatch[1];
@@ -512,20 +525,20 @@ function App() {
               return;
             }
 
-            if (item.type !== 'message') return;
+            if (item.type !== '\''message'\'') return;
 
             const textContent = (item.content || [])
               .map((c: any) => {
-                if (c.type === 'text') return c.text;
-                if (c.type === 'input_text') return c.text;
-                if (c.type === 'input_audio') return c.transcript ?? '';
-                if (c.type === 'audio') return c.transcript ?? '';
-                return '';
+                if (c.type === '\''text'\'') return c.text;
+                if (c.type === '\''input_text'\'') return c.text;
+                if (c.type === '\''input_audio'\'') return c.transcript ?? '\'''\'';
+                if (c.type === '\''audio'\'') return c.transcript ?? '\'''\'';
+                return '\'''\'';
               })
-              .join(' ')
+              .join('\'' '\'')
               .trim();
 
-            const role = item.role as 'user' | 'assistant';
+            const role = item.role as '\''user'\'' | '\''assistant'\'';
 
             if (!textContent) return;
 
@@ -534,10 +547,10 @@ function App() {
             );
               if (!exists) {
                 addTranscriptMessage(item.itemId, role, textContent, false);
-                if (role === 'assistant') {
+                if (role === '\''assistant'\'') {
                   updateTranscriptItem(item.itemId, {
                     guardrailResult: {
-                      status: 'IN_PROGRESS',
+                      status: '\''IN_PROGRESS'\'',
                     },
                   } as any);
                 }
@@ -545,12 +558,12 @@ function App() {
               updateTranscriptMessage(item.itemId, textContent, false);
             }
 
-            if ('status' in item) {
+            if ('\''status'\'' in item) {
               updateTranscriptItem(item.itemId, {
                 status:
-                  (item as any).status === 'completed'
-                    ? 'DONE'
-                    : 'IN_PROGRESS',
+                  (item as any).status === '\''completed'\''
+                    ? '\''DONE'\''
+                    : '\''IN_PROGRESS'\'',
               });
             }
           });
@@ -602,7 +615,7 @@ function App() {
     // In SDK scenarios RealtimeClient manages session config automatically.
     if (sdkClientRef.current) {
       if (shouldTriggerResponse) {
-        sendSimulatedUserMessage('hi');
+        sendSimulatedUserMessage('\''hi'\'');
       }
 
       // Reflect Push-to-Talk UI state by (de)activating server VAD on the
@@ -613,7 +626,7 @@ function App() {
         const turnDetection = isPTTActive
           ? null
           : {
-              type: 'server_vad',
+              type: '\''server_vad'\'',
               threshold: 0.9,
               prefix_padding_ms: 300,
               silence_duration_ms: 500,
@@ -621,13 +634,13 @@ function App() {
             };
         try {
           client.sendEvent({
-            type: 'session.update',
+            type: '\''session.update'\'',
             session: {
               turn_detection: turnDetection,
             },
           });
         } catch (err) {
-          console.warn('Failed to update session', err);
+          console.warn('\''Failed to update session'\'', err);
         }
       }
       return;
@@ -641,7 +654,7 @@ function App() {
       try {
         sdkClientRef.current.interrupt();
       } catch (err) {
-        console.error('Failed to interrupt', err);
+        console.error('\''Failed to interrupt'\'', err);
       }
     }
   };
@@ -651,31 +664,31 @@ function App() {
     cancelAssistantSpeech();
 
     if (!sdkClientRef.current) {
-      console.error('SDK client not available');
+      console.error('\''SDK client not available'\'');
       return;
     }
 
     try {
       sdkClientRef.current.sendUserText(userText.trim());
     } catch (err) {
-      console.error('Failed to send via SDK', err);
+      console.error('\''Failed to send via SDK'\'', err);
     }
 
     setUserText("");
   };
 
   const handleTalkButtonDown = () => {
-    if (sessionStatus !== 'CONNECTED' || sdkClientRef.current == null) return;
+    if (sessionStatus !== '\''CONNECTED'\'' || sdkClientRef.current == null) return;
     cancelAssistantSpeech();
 
     setIsPTTUserSpeaking(true);
     sendClientEvent({ type: "input_audio_buffer.clear" }, "clear PTT buffer");
 
-    // No placeholder; we'll rely on server transcript once ready.
+    // No placeholder; we'\''ll rely on server transcript once ready.
   };
 
   const handleTalkButtonUp = () => {
-    if (sessionStatus !== 'CONNECTED' || sdkClientRef.current == null || !isPTTUserSpeaking)
+    if (sessionStatus !== '\''CONNECTED'\'' || sdkClientRef.current == null || !isPTTUserSpeaking)
       return;
 
     setIsPTTUserSpeaking(false);
@@ -769,7 +782,7 @@ function App() {
       try {
         sdkClientRef.current.mute(!isAudioPlaybackEnabled);
       } catch (err) {
-        console.warn('Failed to toggle SDK mute', err);
+        console.warn('\''Failed to toggle SDK mute'\'', err);
       }
     }
   }, [isAudioPlaybackEnabled]);
@@ -777,11 +790,11 @@ function App() {
   // Ensure mute state is propagated to transport right after we connect or
   // whenever the SDK client reference becomes available.
   useEffect(() => {
-    if (sessionStatus === 'CONNECTED' && sdkClientRef.current) {
+    if (sessionStatus === '\''CONNECTED'\'' && sdkClientRef.current) {
       try {
         sdkClientRef.current.mute(!isAudioPlaybackEnabled);
       } catch (err) {
-        console.warn('mute sync after connect failed', err);
+        console.warn('\''mute sync after connect failed'\'', err);
       }
     }
   }, [sessionStatus, isAudioPlaybackEnabled]);
@@ -898,6 +911,16 @@ function App() {
 
         <Events isExpanded={isEventsPaneExpanded} />
       </div>
+
+      {/* --- Show a user-visible ephemeral key error banner if exists --- */}
+      {ephemeralKeyError && (
+        <div className="absolute top-24 left-0 right-0 z-50 flex justify-center">
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded shadow w-fit">
+            <b>Session Error:</b> {ephemeralKeyError}
+          </div>
+        </div>
+      )}
+      {/* ---------------------------------------------------------------- */}
 
       <BottomToolbar
         sessionStatus={sessionStatus}
