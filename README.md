@@ -1,30 +1,19 @@
-# Realtime API Agents – Quick Overview
+# Realtime API Agents – Quick&nbsp;Start
 
-This repository is a **Next.js (TypeScript) demo app** that showcases how to build multi-agent voice assistants with the **OpenAI Realtime API** and the **OpenAI Agents SDK**. The UI lets you speak to an agent in real time, inspect events, and experiment with different agent configurations.
+This repository is a **Next.js (TypeScript) demo app** that shows how to build low-latency, voice-first agents with the **OpenAI Realtime API** and **OpenAI Agents SDK**.
 
-## Getting started
+Highlights
+• Real-time streaming audio & token-by-token text.
+• Out-of-the-box agent scenarios: chat-supervisor, sequential hand-off, customer-service, and more.
+• Examples of tool calling, agent transfers, guardrails, and event logging.
 
-1. Clone the repo and install dependencies:
-   ```bash
-   npm install
-   ```
-2. Create a `.env` file (see `.env.sample`) and set your `OPENAI_API_KEY`.
-3. Start the development server:
-   ```bash
-   npm run dev
-   ```
-4. Open http://localhost:3000 in your browser and choose a scenario from the drop-down.
+Getting started
+1. `npm install`
+2. Copy `.env.sample` → `.env` and add your `OPENAI_API_KEY`.
+3. `npm run dev` then open http://localhost:3000 and pick a scenario.
 
-That’s it – you can now talk to the demo agents and see streaming transcripts, tool calls, and hand-offs in action.
+Main points of interest
+• `src/app/App.tsx` – top-level React component that connects to the Realtime API and manages UI / audio.
+• `src/app/agentConfigs/` – reusable agent configurations you can modify or extend.
 
-## What’s inside?
-
-• `src/app/App.tsx` – the main React component that connects to the Realtime API, renders the transcript and event log, and handles Push-to-Talk, guardrails, and audio playback.
-• `src/app/agentConfigs/` – ready-made agent configurations illustrating patterns such as Chat-Supervisor and Sequential Handoffs.
-
-Feel free to fork the project and plug in your own agents or tools.
-
-## License
-
-MIT
-
+MIT © OpenAI
