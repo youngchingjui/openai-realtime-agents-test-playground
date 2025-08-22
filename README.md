@@ -59,7 +59,7 @@ sequenceDiagram
   - However, more assistant responses will start with "Let me think", rather than responding immediately with the full response.
 
 ## Modifying for your own agent
-1. Update [supervisorAgent](src/app/agentConfigs/chatSupervisorDemo/supervisorAgent.ts).
+1. Update [supervisorAgent](src/app/agentConfigs/chatSupervisor/supervisorAgent.ts).
   - Add your existing text agent prompt and tools if you already have them. This should contain the "meat" of your voice agent logic and be very specific with what it should/shouldn't do and how exactly it should respond. Add this information below `==== Domain-Specific Agent Instructions ====`.
   - You should likely update this prompt to be more appropriate for voice, for example with instructions to be concise and avoiding long lists of items.
 2. Update [chatAgent](src/app/agentConfigs/chatSupervisor/index.ts).
@@ -216,3 +216,4 @@ Feel free to open an issue or pull request and we'll do our best to review it. T
 - Noah MacCallum - [noahmacca](https://x.com/noahmacca)
 - Ilan Bigio - [ibigio](https://github.com/ibigio)
 - Brian Fioca - [bfioca](https://github.com/bfioca)
+
