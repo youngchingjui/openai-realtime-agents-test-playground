@@ -90,6 +90,7 @@ Speak at a medium pace—steady and clear. Brief pauses can be used for emphasis
       },
       execute: async (input: any) => {
         const { phoneNumber } = input as { phoneNumber: string };
+        void phoneNumber;
         return {
           orders: [
             {
@@ -303,3 +304,4 @@ true/false/need_more_information
 
   handoffs: [],
 });
+

@@ -113,6 +113,9 @@ function App() {
       return;
     }
 
+    // Mark parameter as intentionally unused (kept for backwards compatibility)
+    void eventNameSuffix;
+
     try {
       sdkClientRef.current.sendEvent(eventObj);
     } catch (err) {
@@ -919,3 +922,4 @@ function App() {
 }
 
 export default App;
+
