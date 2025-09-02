@@ -90,6 +90,7 @@ Speak at a medium pace—steady and clear. Brief pauses can be used for emphasis
       },
       execute: async (input: any) => {
         const { phoneNumber } = input as { phoneNumber: string };
+        void phoneNumber;
         return {
           orders: [
             {
@@ -161,6 +162,7 @@ Speak at a medium pace—steady and clear. Brief pauses can be used for emphasis
         additionalProperties: false,
       },
       execute: async (input: any) => {
+        void input;
         return {
           policy: `
 At Snowy Peak Boards, we believe in transparent and customer-friendly policies to ensure you have a hassle-free experience. Below are our detailed guidelines:
@@ -303,3 +305,4 @@ true/false/need_more_information
 
   handoffs: [],
 });
+
