@@ -114,6 +114,8 @@ function App() {
     }
 
     try {
+      // Reference to avoid unused param lint error and for optional future logging
+      void eventNameSuffix;
       sdkClientRef.current.sendEvent(eventObj);
     } catch (err) {
       console.error('Failed to send via SDK', err);
@@ -919,3 +921,4 @@ function App() {
 }
 
 export default App;
+
