@@ -88,7 +88,7 @@ Speak at a medium pace—steady and clear. Brief pauses can be used for emphasis
         required: ['phoneNumber'],
         additionalProperties: false,
       },
-      execute: async (_input: any) => {
+      execute: async () => {
         return {
           orders: [
             {
