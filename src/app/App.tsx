@@ -114,6 +114,10 @@ function App() {
     }
 
     try {
+      if (eventNameSuffix) {
+        // Helpful for debugging in development; no effect on transport
+        console.debug('sendEvent', eventNameSuffix, eventObj);
+      }
       sdkClientRef.current.sendEvent(eventObj);
     } catch (err) {
       console.error('Failed to send via SDK', err);
@@ -919,3 +923,4 @@ function App() {
 }
 
 export default App;
+
