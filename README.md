@@ -208,6 +208,11 @@ Assistant messages are checked for safety and compliance before they are shown i
 - The event log is on the right, showing both client and server events. Click to see the full payload.
 - On the bottom, you can disconnect, toggle between automated voice-activity detection or PTT, turn off audio playback, and toggle logs.
 
+## Development
+- Lint the project: `npm run lint`
+- Start the dev server: `npm run dev`
+- Build for production: `npm run build`
+
 ## Pull Requests
 
 Feel free to open an issue or pull request and we'll do our best to review it. The spirit of this repo is to demonstrate the core logic for new agentic flows; PRs that go beyond this core scope will likely not be merged.
@@ -216,3 +221,4 @@ Feel free to open an issue or pull request and we'll do our best to review it. T
 - Noah MacCallum - [noahmacca](https://x.com/noahmacca)
 - Ilan Bigio - [ibigio](https://github.com/ibigio)
 - Brian Fioca - [bfioca](https://github.com/bfioca)
+
