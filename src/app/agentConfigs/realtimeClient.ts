@@ -93,9 +93,7 @@ export class RealtimeClient {
 
     transport.on('*', (ev: any) => {
       // Surface raw session.updated to console for debugging missing instructions.
-      if (ev?.type === 'session.updated') {
-        // eslint-disable-next-line no-console
-      }
+      // (no-op for now)
       this.#events.emit('message', ev);
     });
 
@@ -169,3 +167,4 @@ export class RealtimeClient {
     this.#session?.mute(muted);
   }
 }
+
