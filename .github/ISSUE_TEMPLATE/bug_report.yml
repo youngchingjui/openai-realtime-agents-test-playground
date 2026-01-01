@@ -1,0 +1,89 @@
+name: Bug report
+description: File a bug report to help us improve the Realtime API Agents demo
+labels: [bug]
+title: "[Bug]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this bug report!
+        Please include clear, actionable details so we can reproduce and fix the issue quickly.
+  - type: input
+    id: summary
+    attributes:
+      label: Summary
+      description: A short, specific summary of the bug.
+      placeholder: App crashes when switching Scenario to customerServiceRetail
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: A clear and concise description of what the bug is.
+      placeholder: Describe what you expected to happen and what actually happened.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction steps
+      description: List the exact steps to reproduce the behavior from a fresh clone.
+      placeholder: |
+        1. npm i && npm run dev
+        2. Open http://localhost:3000
+        3. Choose Scenario "Chat Supervisor"
+        4. Click Connect and say "..."
+        5. Observe error in console "..."
+      render: bash
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: What did you expect to happen?
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: What actually happened?
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Provide OS, browser, Node.js, and package versions if relevant.
+      placeholder: |
+        - OS: macOS 14.6 (Apple Silicon)
+        - Browser: Chrome 121
+        - Node: v20.12.2
+        - Package lock: npm (package-lock.json)
+    validations:
+      required: false
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs and stack traces
+      description: Paste any relevant logs or stack traces. Use backticks to format code.
+      render: shell
+    validations:
+      required: false
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots or screen recordings
+      description: If applicable, add screenshots or recordings to help explain the problem.
+    validations:
+      required: false
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Add any other context about the problem here.
+    validations:
+      required: false
+

@@ -1,0 +1,33 @@
+name: Feature request
+description: Suggest an idea to improve the Realtime API Agents demo
+labels: [enhancement]
+title: "[Feature]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for suggesting a feature! Please provide a clear problem statement and a proposed solution.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem statement
+      description: What problem does this feature solve? Why is it important?
+      placeholder: When using the chat supervisor pattern, it's hard to...
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed solution
+      description: Describe the solution you'd like and any alternatives you've considered.
+      placeholder: Add a setting in src/app/agentConfigs/... that allows...
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Links, screenshots, or examples that help explain your request.
+    validations:
+      required: false
+
