@@ -1,0 +1,70 @@
+name: Bug report
+description: File a bug report to help us improve the Realtime API Agents demo
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out a bug report! Please include as much detail as possible so we can reproduce the issue quickly.
+  - type: input
+    id: summary
+    attributes:
+      label: Summary
+      description: Briefly describe the bug in one sentence.
+      placeholder: e.g., "Session fails to start when using customerServiceRetail config"
+    validations:
+      required: true
+  - type: textarea
+    id: steps-to-reproduce
+    attributes:
+      label: Steps to reproduce
+      description: List the steps needed to reproduce the issue.
+      placeholder: |
+        1. Go to /?agentConfig=customerServiceRetail
+        2. Click Connect
+        3. Say "I'd like to return my snowboard"
+        4. Observe error in console
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: What did you expect to happen?
+      placeholder: The agent should authenticate me and proceed to returns flow.
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: What actually happened? Include any error messages or screenshots.
+      placeholder: Received 401 from /api/session and UI shows "Disconnected".
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      description: OS, browser, Node.js version, and package manager.
+      placeholder: e.g., macOS 15.0, Chrome 121, Node 20.11.0, npm 10.5.0
+    validations:
+      required: false
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs and diagnostics
+      description: Paste relevant console logs or server logs. Please redact secrets.
+      render: shell
+    validations:
+      required: false
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Checklist
+      options:
+        - label: I searched existing issues and didn’t find a duplicate.
+          required: true
+        - label: I can reproduce this with a clean install (rm -rf node_modules && npm ci).
+          required: false
+

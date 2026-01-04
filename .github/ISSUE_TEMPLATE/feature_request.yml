@@ -1,0 +1,54 @@
+name: Feature request
+description: Suggest an idea to improve the Realtime API Agents demo
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the suggestion! Please provide enough context so we understand the problem and the value of the change.
+  - type: input
+    id: summary
+    attributes:
+      label: Summary
+      description: A concise description of the feature.
+      placeholder: e.g., "Add an example using WebSocket transport instead of WebRTC"
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem statement
+      description: What problem does this feature solve? Who is affected?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Describe your proposed solution at a high level. Include alternatives considered and trade-offs if relevant.
+    validations:
+      required: false
+  - type: textarea
+    id: scope
+    attributes:
+      label: Out of scope / Non-goals
+      description: Clarify what is intentionally not included to keep scope focused.
+    validations:
+      required: false
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional context
+      description: Links, references, screenshots, or related issues/PRs.
+    validations:
+      required: false
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Checklist
+      options:
+        - label: I searched existing issues and didn’t find a duplicate.
+          required: true
+        - label: This feature aligns with the repo’s goal to demonstrate core agentic patterns.
+          required: true
+
