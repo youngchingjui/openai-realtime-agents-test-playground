@@ -107,7 +107,10 @@ function App() {
   const { startRecording, stopRecording, downloadRecording } =
     useAudioDownload();
 
-  const sendClientEvent = (eventObj: any, eventNameSuffix = '') => {
+  const sendClientEvent = (eventObj: any, _eventNameSuffix = '') => {
+    // Reference the optional suffix to satisfy linting when provided.
+    void _eventNameSuffix;
+
     if (!sdkClientRef.current) {
       console.error('SDK client not available', eventObj);
       return;
@@ -919,3 +922,4 @@ function App() {
 }
 
 export default App;
+

@@ -292,9 +292,7 @@ export const getNextResponseFromSupervisor = tool({
         {
           type: 'message',
           role: 'user',
-          content: `==== Conversation History ====
-          ${JSON.stringify(filteredLogs, null, 2)}
-          
+          content: `==== Conversation History ====\n          ${JSON.stringify(filteredLogs, null, 2)}\n          
           ==== Relevant Context From Last User Message ===
           ${relevantContextFromLastUserMessage}
           `,
@@ -303,7 +301,7 @@ export const getNextResponseFromSupervisor = tool({
       tools: supervisorAgentTools,
     };
 
-    let response = await fetchResponsesMessage(body);
+    const response = await fetchResponsesMessage(body);
     if (response.error) {
       return { error: 'Something went wrong.' };
     }
@@ -316,4 +314,4 @@ export const getNextResponseFromSupervisor = tool({
     return { nextResponse: finalText as string };
   },
 });
-  
+   
