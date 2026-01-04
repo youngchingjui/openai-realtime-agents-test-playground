@@ -10,7 +10,8 @@ export const moderationGuardrail = {
         tripwireTriggered: triggered,
         outputInfo: res,
       };
-    } catch (_err) {
+    } catch (err) {
+      void err;
       return {
         tripwireTriggered: false,
         outputInfo: { error: 'guardrail_failed' },
