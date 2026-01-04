@@ -1,0 +1,67 @@
+name: Bug report
+description: Report a bug to help us improve
+labels: [bug]
+title: "[Bug]: <short summary>"
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to file a bug! Please fill out the sections below as completely as possible.
+  - type: input
+    id: summary
+    attributes:
+      label: Summary
+      description: A clear, concise, one-sentence summary of the bug.
+      placeholder: "SSR error when switching agent configs"
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: Describe the bug in detail. What happened? What did you expect to happen? Include any relevant logs or screenshots.
+      placeholder: |
+        After selecting the CustomerServiceRetail scenario, navigating back to the home page throws a hydration mismatch.
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      description: Provide a minimal, step-by-step reproduction.
+      placeholder: |
+        1. Go to http://localhost:3000
+        2. Choose "CustomerServiceRetail" from the Scenario dropdown
+        3. Click the browser Back button
+        4. Observe the error in the console
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      placeholder: "Navigating back should not throw and the transcript should reset."
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      placeholder: "Console shows Hydration failed because the initial UI does not match what was rendered on the server."
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      placeholder: "macOS 14.6, Node 20.x, Chrome 121, next 15.3.1"
+    validations:
+      required: false
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional context
+      description: Any other context, logs, or screenshots that help explain the issue.
+    validations:
+      required: false
+

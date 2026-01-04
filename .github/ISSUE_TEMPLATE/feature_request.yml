@@ -1,0 +1,56 @@
+name: Feature request
+description: Suggest an idea or improvement
+labels: [enhancement]
+title: "[Feature]: <short summary>"
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for suggesting an improvement! Please describe the problem this feature would solve and the proposed solution.
+  - type: input
+    id: summary
+    attributes:
+      label: Summary
+      description: A clear, concise, one-sentence summary of the feature.
+      placeholder: "Support for recording and downloading conversation audio as a single file"
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem to solve
+      description: What problem or use case does this address? Why is it important?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Describe how you think this should work. Include API/UX sketches if helpful.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: What other approaches did you consider and why did you not choose them?
+    validations:
+      required: false
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: List bullet points that would indicate this feature is complete.
+      placeholder: |
+        - A "Download Audio" button appears when a call ends
+        - Clicking it downloads a single .wav file for the session
+    validations:
+      required: false
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional context
+      description: Add any other context, mockups, or examples.
+    validations:
+      required: false
+
