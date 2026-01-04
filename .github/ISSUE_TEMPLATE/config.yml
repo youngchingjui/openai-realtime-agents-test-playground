@@ -1,0 +1,6 @@
+blank_issues_disabled: true
+contact_links:
+  - name: Questions and Support
+    url: https://github.com/openai/openai-realtime-agents/discussions
+    about: Please ask and answer usage questions here.
+

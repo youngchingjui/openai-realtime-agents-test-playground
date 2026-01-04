@@ -11,6 +11,7 @@ export const moderationGuardrail = {
         outputInfo: res,
       };
     } catch (err) {
+      void err;
       return {
         tripwireTriggered: false,
         outputInfo: { error: 'guardrail_failed' },
@@ -18,3 +19,4 @@ export const moderationGuardrail = {
     }
   },
 };
+

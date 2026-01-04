@@ -303,8 +303,8 @@ export const getNextResponseFromSupervisor = tool({
       tools: supervisorAgentTools,
     };
 
-    let response = await fetchResponsesMessage(body);
-    if (response.error) {
+    const response = await fetchResponsesMessage(body);
+    if ((response as any).error) {
       return { error: 'Something went wrong.' };
     }
 
@@ -316,4 +316,4 @@ export const getNextResponseFromSupervisor = tool({
     return { nextResponse: finalText as string };
   },
 });
-  
+   
