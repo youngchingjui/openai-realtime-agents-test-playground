@@ -10,7 +10,7 @@ export const moderationGuardrail = {
         tripwireTriggered: triggered,
         outputInfo: res,
       };
-    } catch (err) {
+    } catch (_err) {
       return {
         tripwireTriggered: false,
         outputInfo: { error: 'guardrail_failed' },
@@ -18,3 +18,4 @@ export const moderationGuardrail = {
     }
   },
 };
+
