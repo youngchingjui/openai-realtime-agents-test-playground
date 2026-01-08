@@ -13,7 +13,7 @@ export const moderationGuardrail = {
     } catch {
       return {
         tripwireTriggered: false,
-        outputInfo: { error: 'guardrail_failed' },
+        outputInfo: { error: 'guardrail_failed', details: String(err) },
       };
     }
   },

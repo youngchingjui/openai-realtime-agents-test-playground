@@ -114,6 +114,8 @@ function App() {
     }
 
     try {
+      // Log the client event with a helpful suffix for the Events pane.
+      logClientEvent(eventObj, eventNameSuffix);
       sdkClientRef.current.sendEvent(eventObj);
     } catch (err) {
       console.error('Failed to send via SDK', err);

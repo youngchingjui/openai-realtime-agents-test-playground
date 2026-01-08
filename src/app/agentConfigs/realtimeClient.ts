@@ -92,6 +92,7 @@ export class RealtimeClient {
     const transport: any = this.#session.transport;
 
     transport.on('*', (ev: any) => {
+      // Surface raw session.updated if needed for debugging missing instructions.
       this.#events.emit('message', ev);
     });
 
