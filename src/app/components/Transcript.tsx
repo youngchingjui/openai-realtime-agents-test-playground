@@ -29,6 +29,11 @@ function Transcript({
   const [justCopied, setJustCopied] = useState(false);
   const inputRef = useRef<HTMLInputElement | null>(null);
 
+  // Simple browser speech recognition support (Web Speech API)
+  const recognitionRef = useRef<any>(null);
+  const [isMicSupported, setIsMicSupported] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
+
   function scrollToBottom() {
     if (transcriptRef.current) {
       transcriptRef.current.scrollTop = transcriptRef.current.scrollHeight;
@@ -58,6 +63,62 @@ function Transcript({
       inputRef.current.focus();
     }
   }, [canSend]);
+
+  // Initialize Web Speech API if available
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const SpeechRecognition: any =
+      (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      setIsMicSupported(true);
+      const rec = new SpeechRecognition();
+      rec.lang = "en-US";
+      rec.continuous = false;
+      rec.interimResults = true;
+
+      rec.onresult = (event: any) => {
+        let finalTranscript = "";
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          const result = event.results[i];
+          finalTranscript += result[0]?.transcript ?? "";
+        }
+        if (finalTranscript) {
+          setUserText(finalTranscript);
+        }
+      };
+
+      rec.onerror = () => {
+        setIsRecording(false);
+      };
+
+      rec.onend = () => {
+        // Auto-send when recording ends if we have text
+        setIsRecording(false);
+        if (canSend && (userText || "").trim()) {
+          onSendMessage();
+        }
+      };
+
+      recognitionRef.current = rec;
+    }
+  }, [canSend, onSendMessage, setUserText, userText]);
+
+  const toggleMic = () => {
+    if (!isMicSupported || !recognitionRef.current) return;
+    try {
+      if (!isRecording) {
+        setIsRecording(true);
+        // Clear any previous partial text and start fresh
+        if (!userText) setUserText("");
+        recognitionRef.current.start();
+      } else {
+        recognitionRef.current.stop();
+      }
+    } catch (err) {
+      console.warn("Speech recognition failed:", err);
+      setIsRecording(false);
+    }
+  };
 
   const handleCopyTranscript = async () => {
     if (!transcriptRef.current) return;
@@ -222,8 +283,21 @@ function Transcript({
             }
           }}
           className="flex-1 px-4 py-2 focus:outline-none"
-          placeholder="Type a message..."
+          placeholder="Type a message or use the mic..."
         />
+        <button
+          onClick={toggleMic}
+          disabled={!canSend || !isMicSupported}
+          className={
+            "rounded-full px-3 py-2 mr-1 " +
+            (isRecording
+              ? "bg-red-600 text-white"
+              : "bg-gray-200 hover:bg-gray-300 text-black")
+          }
+          title={isMicSupported ? "Use microphone" : "Microphone not supported"}
+        >
+          {isRecording ? "Stop" : "🎤"}
+        </button>
         <button
           onClick={onSendMessage}
           disabled={!canSend || !userText.trim()}
@@ -237,3 +311,4 @@ function Transcript({
 }
 
 export default Transcript;
+
