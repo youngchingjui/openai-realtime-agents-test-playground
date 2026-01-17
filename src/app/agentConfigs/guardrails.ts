@@ -10,11 +10,12 @@ export const moderationGuardrail = {
         tripwireTriggered: triggered,
         outputInfo: res,
       };
-    } catch (err) {
+    } catch {
       return {
         tripwireTriggered: false,
-        outputInfo: { error: 'guardrail_failed' },
+        outputInfo: { error: 'guardrail_failed', details: String(err) },
       };
     }
   },
 };
+
