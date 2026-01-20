@@ -1,4 +1,4 @@
-"use-client";
+"use client";
 
 import React, { useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
@@ -7,6 +7,7 @@ import Image from "next/image";
 import { useTranscript } from "@/app/contexts/TranscriptContext";
 import { DownloadIcon, ClipboardCopyIcon } from "@radix-ui/react-icons";
 import { GuardrailChip } from "./GuardrailChip";
+import useSpeechRecognition from "../hooks/useSpeechRecognition";
 
 export interface TranscriptProps {
   userText: string;
@@ -28,6 +29,18 @@ function Transcript({
   const [prevLogs, setPrevLogs] = useState<TranscriptItem[]>([]);
   const [justCopied, setJustCopied] = useState(false);
   const inputRef = useRef<HTMLInputElement | null>(null);
+
+  const {
+    isSupported: speechSupported,
+    isListening,
+    transcript: speechText,
+    error: speechError,
+    start: startListening,
+    stop: stopListening,
+    reset: resetSpeech,
+  } = useSpeechRecognition((finalText) => {
+    if (finalText) setUserText((finalText || "").trim());
+  });
 
   function scrollToBottom() {
     if (transcriptRef.current) {
@@ -59,6 +72,13 @@ function Transcript({
     }
   }, [canSend]);
 
+  // Update the text input with interim speech text while listening
+  useEffect(() => {
+    if (isListening) {
+      setUserText(speechText);
+    }
+  }, [isListening, speechText, setUserText]);
+
   const handleCopyTranscript = async () => {
     if (!transcriptRef.current) return;
     try {
@@ -67,6 +87,16 @@ function Transcript({
       setTimeout(() => setJustCopied(false), 1500);
     } catch (error) {
       console.error("Failed to copy transcript:", error);
+    }
+  };
+
+  const onClickMic = () => {
+    if (!speechSupported) return;
+    if (!isListening) {
+      resetSpeech();
+      startListening();
+    } else {
+      stopListening();
     }
   };
 
@@ -222,8 +252,39 @@ function Transcript({
             }
           }}
           className="flex-1 px-4 py-2 focus:outline-none"
-          placeholder="Type a message..."
+          placeholder={
+            speechSupported
+              ? isListening
+                ? "Listening…"
+                : "Type a message or use the mic…"
+              : "Type a message…"
+          }
         />
+
+        {speechSupported && (
+          <button
+            onClick={onClickMic}
+            title={isListening ? "Stop listening" : "Start voice input"}
+            className={
+              "rounded-full p-2 transition-colors " +
+              (isListening
+                ? "bg-red-100 text-red-700 hover:bg-red-200"
+                : "bg-gray-100 text-gray-700 hover:bg-gray-200")
+            }
+          >
+            {/* Simple mic icon */}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              width="24"
+              height="24"
+            >
+              <path d="M12 14a3 3 0 0 0 3-3V6a3 3 0 1 0-6 0v5a3 3 0 0 0 3 3Zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 14 0h-2Zm-5 8a1 1 0 0 0 1-1v-2h-2v2a1 1 0 0 0 1 1Z" />
+            </svg>
+          </button>
+        )}
+
         <button
           onClick={onSendMessage}
           disabled={!canSend || !userText.trim()}
@@ -232,8 +293,15 @@ function Transcript({
           <Image src="arrow.svg" alt="Send" width={24} height={24} />
         </button>
       </div>
+
+      {speechError && (
+        <div className="px-4 pb-4 text-xs text-red-600">
+          Voice input error: {speechError}
+        </div>
+      )}
     </div>
   );
 }
 
 export default Transcript;
+
