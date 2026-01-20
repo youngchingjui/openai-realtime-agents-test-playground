@@ -101,13 +101,29 @@ function App() {
     },
   );
 
+  // Allow simple voice command like "make the background blue"
+  const [customBgColor, setCustomBgColor] = useState<string | null>(null);
+
+  const applyBackgroundFromText = (text: string) => {
+    const lower = text.toLowerCase();
+    if (!/(background|bg)/.test(lower)) return;
+    const colors = [
+      'blue','red','green','purple','pink','black','white','yellow','orange','teal','gray','grey','brown','cyan','magenta'
+    ];
+    const found = colors.find((c) => lower.includes(c));
+    if (found) {
+      setCustomBgColor(found);
+      addTranscriptBreadcrumb('UI Action: Background color changed', { color: found });
+    }
+  };
+
 
 
   // Initialize the recording hook.
   const { startRecording, stopRecording, downloadRecording } =
     useAudioDownload();
 
-  const sendClientEvent = (eventObj: any, eventNameSuffix = '') => {
+  const sendClientEvent = (eventObj: any) => {
     if (!sdkClientRef.current) {
       console.error('SDK client not available', eventObj);
       return;
@@ -580,6 +596,9 @@ function App() {
     const id = uuidv4().slice(0, 32);
     addTranscriptMessage(id, "user", text, true);
 
+    // Apply simple UI command hooks
+    applyBackgroundFromText(text);
+
     sendClientEvent(
       {
         type: "conversation.item.create",
@@ -589,12 +608,10 @@ function App() {
           role: "user",
           content: [{ type: "input_text", text }],
         },
-      },
-      "(simulated user text message)"
+      }
     );
     sendClientEvent(
-      { type: "response.create" },
-      "(trigger response after simulated user text message)"
+      { type: "response.create" }
     );
   };
 
@@ -650,6 +667,9 @@ function App() {
     if (!userText.trim()) return;
     cancelAssistantSpeech();
 
+    // Apply simple UI command hooks
+    applyBackgroundFromText(userText);
+
     if (!sdkClientRef.current) {
       console.error('SDK client not available');
       return;
@@ -669,7 +689,7 @@ function App() {
     cancelAssistantSpeech();
 
     setIsPTTUserSpeaking(true);
-    sendClientEvent({ type: "input_audio_buffer.clear" }, "clear PTT buffer");
+    sendClientEvent({ type: "input_audio_buffer.clear" });
 
     // No placeholder; we'll rely on server transcript once ready.
   };
@@ -679,8 +699,8 @@ function App() {
       return;
 
     setIsPTTUserSpeaking(false);
-    sendClientEvent({ type: "input_audio_buffer.commit" }, "commit PTT");
-    sendClientEvent({ type: "response.create" }, "trigger response PTT");
+    sendClientEvent({ type: "input_audio_buffer.commit" });
+    sendClientEvent({ type: "response.create" });
   };
 
   const onToggleConnection = () => {
@@ -802,7 +822,7 @@ function App() {
   const agentSetKey = searchParams.get("agentConfig") || "default";
 
   return (
-    <div className="text-base flex flex-col h-screen bg-gray-100 text-gray-800 relative">
+    <div className="text-base flex flex-col h-screen bg-gray-100 text-gray-800 relative" style={{ backgroundColor: customBgColor || undefined }}>
       <div className="p-5 text-lg font-semibold flex justify-between items-center">
         <div
           className="flex items-center cursor-pointer"
@@ -919,3 +939,4 @@ function App() {
 }
 
 export default App;
+
