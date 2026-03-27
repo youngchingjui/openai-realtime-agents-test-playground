@@ -2,7 +2,7 @@
 
 This is a demonstration of more advanced patterns for voice agents, using the OpenAI Realtime API and the OpenAI Agents SDK. 
 
-** NOTE:** For a version that does not use the OpenAI Agents SDK, see the [branch without-agents-sdk](https://github.com/openai/openai-realtime-agents/tree/without-agents-sdk).
+**Note:** For a version that does not use the OpenAI Agents SDK, see the [branch without-agents-sdk](https://github.com/openai/openai-realtime-agents/tree/without-agents-sdk).
 
 There are two main patterns demonstrated:
 1. **Chat-Supervisor:** A realtime-based chat agent interacts with the user and handles basic tasks, while a more intelligent, text-based supervisor model (e.g., `gpt-4.1`) is used extensively for tool calls and more complex responses. This approach provides an easy onramp and high-quality answers, with a small increase in latency.
@@ -59,7 +59,7 @@ sequenceDiagram
   - However, more assistant responses will start with "Let me think", rather than responding immediately with the full response.
 
 ## Modifying for your own agent
-1. Update [supervisorAgent](src/app/agentConfigs/chatSupervisorDemo/supervisorAgent.ts).
+1. Update [supervisorAgent](src/app/agentConfigs/chatSupervisor/supervisorAgent.ts).
   - Add your existing text agent prompt and tools if you already have them. This should contain the "meat" of your voice agent logic and be very specific with what it should/shouldn't do and how exactly it should respond. Add this information below `==== Domain-Specific Agent Instructions ====`.
   - You should likely update this prompt to be more appropriate for voice, for example with instructions to be concise and avoiding long lists of items.
 2. Update [chatAgent](src/app/agentConfigs/chatSupervisor/index.ts).
@@ -77,7 +77,7 @@ Here's a [video walkthrough](https://x.com/OpenAIDevs/status/1880306081517432936
 ![Screenshot of the Realtime API Agents Demo](/public/screenshot_handoff.png)
 *In this simple example, the user is transferred from a greeter agent to a haiku agent. See below for the simple, full configuration of this flow.*
 
-Configuration in `src/app/agentConfigs/simpleExample.ts`
+Configuration in `src/app/agentConfigs/simpleHandoff.ts`
 ```typescript
 import { RealtimeAgent } from '@openai/agents/realtime';
 
@@ -113,25 +113,25 @@ This is a more complex, representative implementation that illustrates a custome
 
 Configuration in [src/app/agentConfigs/customerServiceRetail/index.ts](src/app/agentConfigs/customerServiceRetail/index.ts).
 ```javascript
-import authentication from "./authentication";
-import returns from "./returns";
-import sales from "./sales";
-import simulatedHuman from "./simulatedHuman";
-import { injectTransferTools } from "../utils";
+import { authenticationAgent } from './authentication';
+import { returnsAgent } from './returns';
+import { salesAgent } from './sales';
+import { simulatedHumanAgent } from './simulatedHuman';
 
-authentication.downstreamAgents = [returns, sales, simulatedHuman];
-returns.downstreamAgents = [authentication, sales, simulatedHuman];
-sales.downstreamAgents = [authentication, returns, simulatedHuman];
-simulatedHuman.downstreamAgents = [authentication, returns, sales];
+// Cast to `any` to satisfy TypeScript until the core types make RealtimeAgent
+// assignable to `Agent<unknown>` (current library versions are invariant on
+// the context type).
+(authenticationAgent.handoffs as any).push(returnsAgent, salesAgent, simulatedHumanAgent);
+(returnsAgent.handoffs as any).push(authenticationAgent, salesAgent, simulatedHumanAgent);
+(salesAgent.handoffs as any).push(authenticationAgent, returnsAgent, simulatedHumanAgent);
+(simulatedHumanAgent.handoffs as any).push(authenticationAgent, returnsAgent, salesAgent);
 
-const agents = injectTransferTools([
-  authentication,
-  returns,
-  sales,
-  simulatedHuman,
-]);
-
-export default agents;
+export const customerServiceRetailScenario = [
+  authenticationAgent,
+  returnsAgent,
+  salesAgent,
+  simulatedHumanAgent,
+];
 ```
 
 ## Schematic
@@ -216,3 +216,4 @@ Feel free to open an issue or pull request and we'll do our best to review it. T
 - Noah MacCallum - [noahmacca](https://x.com/noahmacca)
 - Ilan Bigio - [ibigio](https://github.com/ibigio)
 - Brian Fioca - [bfioca](https://github.com/bfioca)
+
