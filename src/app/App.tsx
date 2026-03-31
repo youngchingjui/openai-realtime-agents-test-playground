@@ -108,6 +108,9 @@ function App() {
     useAudioDownload();
 
   const sendClientEvent = (eventObj: any, eventNameSuffix = '') => {
+    // Mark second parameter as intentionally unused (passed for logging context in some callers)
+    void eventNameSuffix;
+
     if (!sdkClientRef.current) {
       console.error('SDK client not available', eventObj);
       return;
@@ -919,3 +922,4 @@ function App() {
 }
 
 export default App;
+

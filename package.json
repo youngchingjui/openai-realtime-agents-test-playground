@@ -2,6 +2,7 @@
   "name": "realtime-examples",
   "version": "0.1.0",
   "private": true,
+  "description": "Demo of realtime voice agents built with OpenAI Realtime API and Agents SDK (Chat Supervisor and Sequential Handoff patterns).",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -32,3 +33,4 @@
     "typescript": "^5"
   }
 }
+
