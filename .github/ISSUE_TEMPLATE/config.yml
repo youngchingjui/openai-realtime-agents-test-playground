@@ -1,0 +1,6 @@
+blank_issues_disabled: true
+contact_links:
+  - name: Questions about the OpenAI API
+    url: https://platform.openai.com/docs
+    about: Please check the official docs for general API questions before filing an issue.
+
