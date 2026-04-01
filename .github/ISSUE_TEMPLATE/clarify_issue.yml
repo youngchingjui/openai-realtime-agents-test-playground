@@ -1,0 +1,105 @@
+name: "General Issue"
+description: "Create a clear, actionable issue (bug, feature, or question)."
+title: "[Type] Short, specific summary"
+labels:
+  - needs-triage
+body:
+  - type: dropdown
+    id: type
+    attributes:
+      label: Issue type
+      description: What kind of issue is this?
+      options:
+        - Bug
+        - Feature request
+        - Question
+        - Documentation
+        - Refactor/Chore
+      multiple: false
+    validations:
+      required: true
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary / Problem statement
+      description: "Describe the problem succinctly. Include relevant context so a newcomer can understand it. Avoid placeholders like 'asdf' or 'fix this'."
+      placeholder: "Example: When running `npm run dev` on Node 20, the app fails to start with a Module Not Found error for '@openai/agents'. This prevents contributors from testing changes locally."
+      render: markdown
+    validations:
+      required: true
+
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce (for bugs)
+      description: Minimal, reproducible steps. If not a bug, write "N/A".
+      placeholder: |
+        1. Fresh clone on macOS 14.5
+        2. Node v20.11.1, npm 10.5.0
+        3. Copy .env.sample to .env and set OPENAI_API_KEY
+        4. Run `npm i && npm run dev`
+        5. Observe error in terminal
+      render: markdown
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      placeholder: "Example: The dev server starts and serves http://localhost:3000 without runtime errors."
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior / Logs
+      description: Include exact error messages and screenshots where helpful.
+      placeholder: |
+        Terminal logs or screenshots
+        ```
+        Error: Module not found: Can't resolve '@openai/agents'
+        ```
+      render: markdown
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Version / Commit
+      description: App version, git commit SHA, or release tag if applicable.
+      placeholder: e.g. main @ 60f4eff / v0.1.0
+
+  - type: textarea
+    id: env
+    attributes:
+      label: Environment
+      description: Your environment details.
+      placeholder: |
+        - OS: macOS 14.5 (Apple Silicon)
+        - Node: 20.11.1
+        - npm: 10.5.0
+        - Browser: Chrome 123
+      render: markdown
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution (optional)
+      description: If you have an idea for how to fix this, outline it here.
+      placeholder: "Example: Add '@openai/agents' to dependencies and update README with setup instructions."
+      render: markdown
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Pre-submission checks
+      options:
+        - label: I searched existing issues and PRs and didn't find a match.
+          required: true
+        - label: This issue contains enough detail for someone else to take action.
+          required: true
+
