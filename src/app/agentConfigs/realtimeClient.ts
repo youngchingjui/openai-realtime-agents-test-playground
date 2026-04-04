@@ -94,7 +94,6 @@ export class RealtimeClient {
     transport.on('*', (ev: any) => {
       // Surface raw session.updated to console for debugging missing instructions.
       if (ev?.type === 'session.updated') {
-        // eslint-disable-next-line no-console
       }
       this.#events.emit('message', ev);
     });
