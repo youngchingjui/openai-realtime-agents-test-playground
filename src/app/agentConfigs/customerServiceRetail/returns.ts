@@ -262,7 +262,7 @@ ${JSON.stringify(filteredLogs.slice(-nMostRecentLogs), null, 2)}
 
 # Is Eligible
 true/false/need_more_information
-// "true" if you're confident that it's true given the provided context, and no additional info is needex
+// "true" if you're confident that it's true given the provided context, and no additional info is needed
 // "need_more_information" if you need ANY additional information to make a clear determination.
 
 # Additional Information Needed
