@@ -59,7 +59,7 @@ sequenceDiagram
   - However, more assistant responses will start with "Let me think", rather than responding immediately with the full response.
 
 ## Modifying for your own agent
-1. Update [supervisorAgent](src/app/agentConfigs/chatSupervisorDemo/supervisorAgent.ts).
+1. Update [supervisorAgent](src/app/agentConfigs/chatSupervisor/supervisorAgent.ts).
   - Add your existing text agent prompt and tools if you already have them. This should contain the "meat" of your voice agent logic and be very specific with what it should/shouldn't do and how exactly it should respond. Add this information below `==== Domain-Specific Agent Instructions ====`.
   - You should likely update this prompt to be more appropriate for voice, for example with instructions to be concise and avoiding long lists of items.
 2. Update [chatAgent](src/app/agentConfigs/chatSupervisor/index.ts).
@@ -77,14 +77,14 @@ Here's a [video walkthrough](https://x.com/OpenAIDevs/status/1880306081517432936
 ![Screenshot of the Realtime API Agents Demo](/public/screenshot_handoff.png)
 *In this simple example, the user is transferred from a greeter agent to a haiku agent. See below for the simple, full configuration of this flow.*
 
-Configuration in `src/app/agentConfigs/simpleExample.ts`
+Configuration in `src/app/agentConfigs/simpleHandoff.ts`
 ```typescript
 import { RealtimeAgent } from '@openai/agents/realtime';
 
-// Define agents using the OpenAI Agents SDK
 export const haikuWriterAgent = new RealtimeAgent({
   name: 'haikuWriter',
-  handoffDescription: 'Agent that writes haikus.', // Context for the agent_transfer tool
+  voice: 'sage',
+  handoffDescription: 'Agent that writes haikus',
   instructions:
     'Ask the user for a topic, then reply with a haiku about that topic.',
   tools: [],
@@ -93,15 +93,16 @@ export const haikuWriterAgent = new RealtimeAgent({
 
 export const greeterAgent = new RealtimeAgent({
   name: 'greeter',
-  handoffDescription: 'Agent that greets the user.',
+  voice: 'sage',
+  handoffDescription: 'Agent that greets the user',
   instructions:
-    "Please greet the user and ask them if they'd like a haiku. If yes, hand off to the 'haikuWriter' agent.",
+    "Please greet the user and ask them if they'd like a Haiku. If yes, hand off to the 'haiku' agent.",
   tools: [],
   handoffs: [haikuWriterAgent], // Define which agents this agent can hand off to
 });
 
 // An Agent Set is just an array of the agents that participate in the scenario
-export default [greeterAgent, haikuWriterAgent];
+export const simpleHandoffScenario = [greeterAgent, haikuWriterAgent];
 ```
 ## CustomerServiceRetail Flow
 
@@ -112,26 +113,24 @@ This is a more complex, representative implementation that illustrates a custome
   - To test this flow, say that you'd like to return your snowboard and go through the necessary prompts!
 
 Configuration in [src/app/agentConfigs/customerServiceRetail/index.ts](src/app/agentConfigs/customerServiceRetail/index.ts).
-```javascript
-import authentication from "./authentication";
-import returns from "./returns";
-import sales from "./sales";
-import simulatedHuman from "./simulatedHuman";
-import { injectTransferTools } from "../utils";
+```typescript
+import { authenticationAgent } from './authentication';
+import { returnsAgent } from './returns';
+import { salesAgent } from './sales';
+import { simulatedHumanAgent } from './simulatedHuman';
 
-authentication.downstreamAgents = [returns, sales, simulatedHuman];
-returns.downstreamAgents = [authentication, sales, simulatedHuman];
-sales.downstreamAgents = [authentication, returns, simulatedHuman];
-simulatedHuman.downstreamAgents = [authentication, returns, sales];
+// Wire up bidirectional handoffs between all agents
+(authenticationAgent.handoffs as any).push(returnsAgent, salesAgent, simulatedHumanAgent);
+(returnsAgent.handoffs as any).push(authenticationAgent, salesAgent, simulatedHumanAgent);
+(salesAgent.handoffs as any).push(authenticationAgent, returnsAgent, simulatedHumanAgent);
+(simulatedHumanAgent.handoffs as any).push(authenticationAgent, returnsAgent, salesAgent);
 
-const agents = injectTransferTools([
-  authentication,
-  returns,
-  sales,
-  simulatedHuman,
-]);
-
-export default agents;
+export const customerServiceRetailScenario = [
+  authenticationAgent,
+  returnsAgent,
+  salesAgent,
+  simulatedHumanAgent,
+];
 ```
 
 ## Schematic
